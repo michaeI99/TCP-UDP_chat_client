@@ -3,30 +3,42 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 
 int main(){
-    int server_socket;
-    struct sockaddr_in server_addr;
+    struct addrinfo hints, *res;
+    struct sockaddr_storage client_addr;
+    int server_socket, client_socket;
 
-    // Create socket
-    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    // load up address structs with getaddrinfo()
+
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC;  // use IPv4 or IPv6
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;  
+
+
+    if (getaddrinfo(NULL, "8080", &hints, &res) != 0) {
+        perror("getaddrinfo failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // create socket
+    server_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (server_socket == -1) {
         perror("socket creation failed");
         exit(EXIT_FAILURE);
     }
     printf("Socket created successfully\n");
 
-    // Set server address
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(8080);
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-
-    // Bind socket to server address
-    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+    // bind socket
+    if (bind(server_socket, res->ai_addr, res->ai_addrlen) < 0) {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
     printf("Socket bound successfully\n");
+
+    freeaddrinfo(res);
 
     // Listen for incoming connections
     if (listen(server_socket, 3) < 0) {
@@ -35,13 +47,14 @@ int main(){
     }
     printf("Server is listening...\n");
 
-    int client_socket;
-    struct sockaddr_in client_addr;
     socklen_t client_size = sizeof(client_addr);
 
     // Accept incoming connections
     while ((client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &client_size)) >= 0) {
-        printf("New connection, socket fd is %d, ip is : %s, port : %d\n", client_socket, inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+        struct sockaddr_in *client_addr_in = (struct sockaddr_in *)&client_addr;
+        printf("New connection, socket fd is %d, ip is : %s, port : %d\n", client_socket, 
+        inet_ntoa(client_addr_in->sin_addr), 
+        ntohs(client_addr_in->sin_port));
 
         // Send message to client
         char *message = "Hello from Server!\n";
