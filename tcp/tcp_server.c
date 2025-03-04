@@ -30,9 +30,9 @@ int main(){
     struct sockaddr_storage client_addr1, client_addr2;
     int server_socket, client_socket1, client_socket2;
 
-    // load up address structs with getaddrinfo()
+    // load up address structs
     memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;  // use IPv4 or IPv6
+    hints.ai_family = AF_UNSPEC;  
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;  
 
