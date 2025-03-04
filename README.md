@@ -1,6 +1,4 @@
-As of right now this is a basic TCP server
-
-It's a simple TCP server implementation in C that demonstrates fundamental socket programming concepts.
+As of right now this is a basic TCP server in C that demonstrates fundamental socket programming concepts.
 
 ### Current Functionality
 
