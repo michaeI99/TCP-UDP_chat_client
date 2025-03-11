@@ -44,7 +44,7 @@ for(int port = PORT_START; port <= PORT_END; port++){
     // convert port number to string
     char port_str[6];
     snprintf(port_str, sizeof(port_str), '%d', port);
-    if (getaddrinfo(NULL, "8080", &hints, &res) != 0) {
+    if (getaddrinfo(NULL, port_str, &hints, &res) != 0) {
         perror("getaddrinfo failed");
         exit(EXIT_FAILURE);
     }
